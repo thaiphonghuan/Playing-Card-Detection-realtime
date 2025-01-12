@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Realtime Detection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+        .video-container {
+            flex: 2;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .label-container {
+            flex: 1;
+            padding: 20px;
+            background-color: #fff;
+            border-left: 2px solid #ddd;
+            overflow-y: auto;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        img {
+            max-width: 100%;
+            border-radius: 10px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        .label-box {
+            width: 90%;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            margin: 10px 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .label-box h3 {
+            margin: 0;
+            color: #007bff;
+        }
+
+        .label-box p {
+            margin: 5px 0 0;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="video-container">
+        <h1>Realtime Detection</h1>
+        <img src="{{ url_for('video_feed') }}" alt="Video Stream">
+    </div>
+    <div class="label-container">
+        <h2>Detected Labels</h2>
+        <div id="labels"></div>
+    </div>
+
+    <script>
+        const labelsDiv = document.getElementById('labels');
+
+        // Hàm cập nhật danh sách nhãn từ server
+        function updateLabels() {
+            fetch('/labels')
+                .then(response => response.json())
+                .then(data => {
+                    labelsDiv.innerHTML = ''; // Xóa nội dung cũ
+                    for (const [label, count] of Object.entries(data)) {
+                        const labelBox = document.createElement('div');
+                        labelBox.classList.add('label-box');
+                        labelBox.innerHTML = `
+                            <h3>${label}</h3>
+                            <p>Count: ${count}</p>
+                        `;
+                        labelsDiv.appendChild(labelBox);
+                    }
+                })
+                .catch(error => console.error('Error fetching labels:', error));
+        }
+
+        // Cập nhật nhãn mỗi giây
+        setInterval(updateLabels, 1000);
+    </script>
+</body>
+</html>
